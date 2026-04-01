@@ -5,7 +5,7 @@ import (
 	"go-gin-api/dto"
 	"go-gin-api/repository"
 	"go-gin-api/service"
-	"net/http"
+	"go-gin-api/utils"
 	"strconv"
 	"time"
 
@@ -25,9 +25,10 @@ func CreateTasks(c *gin.Context) {
 	var req dto.CreateTaskRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "invalid  request",
-		})
+		utils.Error(c, 400, "invalid request")
+		// c.JSON(http.StatusBadRequest, gin.H{
+		// 	"error": "invalid  request",
+		// })
 		return
 	}
 	userIDInterface, _ := c.Get("userID")
@@ -40,23 +41,26 @@ func CreateTasks(c *gin.Context) {
 		CreateAt: time.Now(),
 	}
 	if err := repository.CreateTask(repository.DB, &task); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "can't create task",
-		})
+		utils.Error(c, 400, "can't create task")
+		// c.JSON(http.StatusBadRequest, gin.H{
+		// 	"error": "can't create task",
+		// })
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"message": "task created!",
-	})
+	utils.Success(c, task)
+	// c.JSON(http.StatusOK, gin.H{
+	// 	"message": "task created!",
+	// })
 }
 
 func GetAllTasks(c *gin.Context) {
 	role, _ := c.Get("role")
 	fmt.Println("role", role)
 	if role != "admin" {
-		c.JSON(http.StatusForbidden, gin.H{
-			"error": "permission denied",
-		})
+		utils.Error(c, 401, "permission denied")
+		// c.JSON(http.StatusForbidden, gin.H{
+		// 	"error": "permission denied",
+		// })
 		return
 	}
 	pageStr := c.Query("page")
@@ -75,15 +79,17 @@ func GetAllTasks(c *gin.Context) {
 
 	tasks, err, total := repository.GetTasks(repository.DB, page, pageSize)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "出错了",
-		})
+		utils.Error(c, 400, "出错了")
+		// c.JSON(http.StatusBadRequest, gin.H{
+		// 	"error": "出错了",
+		// })
 		return
 	}
 
 	//c.JSON(http.StatusOK, tasks)
 	//优化返回结构
-	c.JSON(http.StatusOK, gin.H{
+	utils.Success(c, gin.H{
+		//c.JSON(http.StatusOK, gin.H{
 		"code":    200,
 		"message": "success",
 		"data": gin.H{
@@ -100,12 +106,16 @@ func GetTaskById(c *gin.Context) {
 	id, _ := strconv.Atoi(ids)
 	task, err := repository.GetTaskByID(repository.DB, uint(id))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "taskid doesn't exist",
-		})
+		utils.Error(c, 400, "taskid doesn't exist")
+		// c.JSON(http.StatusBadRequest, gin.H{
+		// 	"error": "taskid doesn't exist",
+		// })
 		return
 	}
-	c.JSON(http.StatusOK, task)
+	utils.Success(c, gin.H{
+		"task": task,
+	})
+	//c.JSON(http.StatusOK, task)
 
 }
 
@@ -114,22 +124,25 @@ func UpdateTaskById(c *gin.Context) {
 	ids := c.Param("id")
 	id, _ := strconv.Atoi(ids)
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "invalid  request",
-		})
+		utils.Error(c, 400, "invalid request")
+		// c.JSON(http.StatusBadRequest, gin.H{
+		// 	"error": "invalid  request",
+		// })
 		return
 	}
 	err := service.UpdateTask(uint(id), req)
 	if err != nil {
-		c.JSON(400, gin.H{
-			"error": err.Error(),
-		})
+		utils.Error(c, 400, err.Error())
+		// c.JSON(400, gin.H{
+		// 	"error": err.Error(),
+		// })
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"message": "update successed",
-	})
+	utils.Success(c, nil)
+	// c.JSON(http.StatusOK, gin.H{
+	// 	"message": "update successed",
+	// })
 
 }
 
@@ -138,18 +151,22 @@ func TaskDelete(c *gin.Context) {
 	id, _ := strconv.Atoi(ids)
 	tasks, err := repository.GetTaskByID(repository.DB, uint(id))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "task not found",
-		})
+		utils.Error(c, 400, "task not found")
+		// c.JSON(http.StatusBadRequest, gin.H{
+		// 	"error": "task not found",
+		// })
 		return
 	}
 	if err := repository.DeleteTask(repository.DB, tasks); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Can't delete",
-		})
+		utils.Error(c, 400, "can't delete")
+		// c.JSON(http.StatusBadRequest, gin.H{
+		// 	"error": "Can't delete",
+		// })
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"message": "delete  successed",
-	})
+
+	utils.Success(c, nil)
+	// c.JSON(http.StatusOK, gin.H{
+	// 	"message": "delete  successed",
+	// })
 }

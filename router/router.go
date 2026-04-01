@@ -2,9 +2,11 @@ package router
 
 import (
 	"go-gin-api/handler"
-	middleeware "go-gin-api/middleware"
+	middleware "go-gin-api/middleware"
 
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 func SetRouter() *gin.Engine {
@@ -13,6 +15,7 @@ func SetRouter() *gin.Engine {
 
 	protected := r.Group("/")
 	//公共接口
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	public := r.Group("/")
 	{
 		public.POST("/register", handler.Register)
@@ -20,19 +23,19 @@ func SetRouter() *gin.Engine {
 		public.GET("/ping", handler.Ping)
 	}
 	//
-	protected.Use(middleeware.AuthMiddleware())
+	protected.Use(middleware.AuthMiddleware())
 	{
 		protected.GET("/admin/users",
-			middleeware.RoleMiddleware("admin"),
+			middleware.RoleMiddleware("admin"),
 			handler.AdminGetUsers,
 		)
 		protected.POST("/tasks/create", handler.CreateTasks)
 		protected.GET("/tasks/get", handler.GetAllTasks)
-		protected.GET("/tasks/:id", middleeware.OperateMiddleware(),
+		protected.GET("/tasks/:id", middleware.OperateMiddleware(),
 			handler.GetTaskById)
-		protected.PUT("/tasks/:id", middleeware.OperateMiddleware(),
+		protected.PUT("/tasks/:id", middleware.OperateMiddleware(),
 			handler.UpdateTaskById)
-		protected.DELETE("/tasks/:id", middleeware.OperateMiddleware(),
+		protected.DELETE("/tasks/:id", middleware.OperateMiddleware(),
 			handler.TaskDelete)
 
 	}

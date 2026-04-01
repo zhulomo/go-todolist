@@ -1,6 +1,7 @@
 package main
 
 import (
+	_ "go-gin-api/docs"
 	"go-gin-api/repository"
 	"go-gin-api/router"
 	"log"

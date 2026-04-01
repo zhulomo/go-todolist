@@ -1,9 +1,9 @@
-package middleeware
+package middleware
 
 import (
 	"fmt"
 	"go-gin-api/repository"
-	"net/http"
+	"go-gin-api/utils"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -15,9 +15,10 @@ func RoleMiddleware(requireRole string) gin.HandlerFunc {
 		//role, exists := c.Get("role")
 		userIDInterface, exists := c.Get("userID")
 		if !exists {
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"error": "not user exist",
-			})
+			utils.Error(c, 401, "not user exist")
+			// c.JSON(http.StatusUnauthorized, gin.H{
+			// 	"error": "not user exist",
+			// })
 			c.Abort()
 			return
 		}
@@ -26,16 +27,18 @@ func RoleMiddleware(requireRole string) gin.HandlerFunc {
 		role, err := repository.GetRoleByUserID(repository.DB, userID)
 
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"error": "database wrong",
-			})
+			utils.Error(c, 400, "database wrong")
+			// c.JSON(http.StatusBadRequest, gin.H{
+			// 	"error": "database wrong",
+			// })
 			c.Abort()
 			return
 		}
 		if role != requireRole {
-			c.JSON(http.StatusForbidden, gin.H{
-				"error": "permission denied",
-			})
+			utils.Error(c, 401, "permission denied")
+			// c.JSON(http.StatusForbidden, gin.H{
+			// 	"error": "permission denied",
+			// })
 			c.Abort()
 			return
 		}
@@ -47,9 +50,10 @@ func OperateMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userIInterface, exists := c.Get("userID")
 		if !exists {
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"error": "not user exist",
-			})
+			utils.Error(c, 401, "not user exist")
+			// c.JSON(http.StatusUnauthorized, gin.H{
+			// 	"error": "not user exist",
+			// })
 			c.Abort()
 			return
 		}
@@ -58,16 +62,18 @@ func OperateMiddleware() gin.HandlerFunc {
 		taskID, err := strconv.Atoi(c.Param("id"))
 		task, err := repository.GetTaskByID(repository.DB, uint(taskID))
 		if err != nil {
-			c.JSON(http.StatusNotFound, gin.H{
-				"error": "taskid doesn't exist",
-			})
+			utils.Error(c, 404, "taskid doesn't exist")
+			// c.JSON(http.StatusNotFound, gin.H{
+			// 	"error": "taskid doesn't exist",
+			// })
 			c.Abort()
 			return
 		}
 		if userID != task.UserID {
-			c.JSON(http.StatusForbidden, gin.H{
-				"error": "you haven't permission",
-			})
+			utils.Error(c, 401, "permission denied")
+			// c.JSON(http.StatusForbidden, gin.H{
+			// 	"error": "you haven't permission",
+			// })
 			c.Abort()
 			return
 		}

@@ -30,7 +30,8 @@ func SetRouter() *gin.Engine {
 			handler.AdminGetUsers,
 		)
 		protected.POST("/tasks/create", handler.CreateTasks)
-		protected.GET("/tasks/get", handler.GetAllTasks)
+		protected.GET("/tasks/get", middleware.RequireRole("admin"),
+			handler.GetAllTasks)
 		protected.GET("/tasks/:id", middleware.OperateMiddleware(),
 			handler.GetTaskById)
 		protected.PUT("/tasks/:id", middleware.OperateMiddleware(),

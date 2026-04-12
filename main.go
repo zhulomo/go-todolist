@@ -7,6 +7,9 @@ import (
 	"log"
 )
 
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 func main() {
 
 	if err := repository.InitDB(); err != nil {

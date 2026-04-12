@@ -22,3 +22,25 @@ func UpdateTask(id uint, req dto.UpdateTaskRequest) error {
 	return nil
 
 }
+
+func CreateTask(id uint, req dto.CreateTaskRequest) error {
+	task := repository.Task{
+		Title:    req.Title,
+		Content:  req.Content,
+		Status:   req.Status,
+		UserID:   id,
+		CreateAt: time.Now(),
+	}
+	if error := repository.CreateTask(repository.DB, &task); error != nil {
+		return errors.New("can't create task")
+	}
+	return nil
+}
+
+func GetAllTasks(page, pageSize int) ([]repository.Task, int64, error) {
+	tasks, err, total := repository.GetTasks(repository.DB, page, pageSize)
+	if err != nil {
+		return []repository.Task{}, 0, errors.New("出错了")
+	}
+	return tasks, total, nil
+}

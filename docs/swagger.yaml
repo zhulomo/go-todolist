@@ -1,4 +1,22 @@
 definitions:
+  dto.CreateTaskRequest:
+    properties:
+      content:
+        type: string
+      status:
+        type: string
+      title:
+        type: string
+    type: object
+  dto.UpdateTaskRequest:
+    properties:
+      content:
+        type: string
+      status:
+        type: string
+      title:
+        type: string
+    type: object
   handler.LoginRequest:
     properties:
       password:
@@ -11,6 +29,14 @@ definitions:
       password:
         type: string
       username:
+        type: string
+    type: object
+  utils.Response:
+    properties:
+      code:
+        type: integer
+      data: {}
+      message:
         type: string
     type: object
 info:
@@ -48,4 +74,108 @@ paths:
       summary: 用户注册
       tags:
       - 用户
+  /tasks/{id}:
+    post:
+      consumes:
+      - application/json
+      description: 用户新建任务
+      parameters:
+      - description: 用户ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 任务信息
+        in: body
+        name: task
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateTaskRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: 新建任务
+      tags:
+      - tasks
+    put:
+      consumes:
+      - application/json
+      description: 更新当前用户的任务
+      parameters:
+      - description: 任务ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 任务信息
+        in: body
+        name: task
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateTaskRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: 更新任务
+      tags:
+      - tasks
+  /tasks/get:
+    get:
+      description: 获取所有用户的所有任务
+      parameters:
+      - description: 页数
+        in: query
+        name: page
+        required: true
+        type: integer
+      - description: 每页数量
+        in: query
+        name: pageSize
+        required: true
+        type: integer
+      - description: admin required
+        in: header
+        name: role
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: 获取所有任务
+      tags:
+      - tasks
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

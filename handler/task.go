@@ -1,13 +1,11 @@
 package handler
 
 import (
-	"fmt"
 	"go-gin-api/dto"
 	"go-gin-api/repository"
 	"go-gin-api/service"
 	"go-gin-api/utils"
 	"strconv"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -21,6 +19,17 @@ import (
 //		UpdateAt time.Time `json:"updateAt"`
 //	}
 
+// @Summary 新建任务
+// @Description 用户新建任务
+// @Tags tasks
+// @Accept json
+// @Produce json
+// @Param id path int true "用户ID"
+// @Param task body dto.CreateTaskRequest true "任务信息"
+// @Success 200 {object} utils.Response
+// @Failure 400 {object} utils.Response
+// @Router /tasks/{id} [post]
+// @Security BearerAuth
 func CreateTasks(c *gin.Context) {
 	var req dto.CreateTaskRequest
 
@@ -33,36 +42,33 @@ func CreateTasks(c *gin.Context) {
 	}
 	userIDInterface, _ := c.Get("userID")
 	userID := userIDInterface.(uint)
-	task := repository.Task{
-		Title:    req.Title,
-		Content:  req.Content,
-		Status:   req.Status,
-		UserID:   userID,
-		CreateAt: time.Now(),
-	}
-	if err := repository.CreateTask(repository.DB, &task); err != nil {
-		utils.Error(c, 400, "can't create task")
+
+	if err := service.CreateTask(userID, req); err != nil {
+		utils.Error(c, 400, err.Error())
 		// c.JSON(http.StatusBadRequest, gin.H{
 		// 	"error": "can't create task",
 		// })
 		return
 	}
-	utils.Success(c, task)
+	utils.Success(c, nil)
 	// c.JSON(http.StatusOK, gin.H{
 	// 	"message": "task created!",
 	// })
 }
 
+// @Summary 获取所有任务
+// @Description 获取所有用户的所有任务
+// @Tags tasks
+// @Produce json
+// @Param page query int true "页数"
+// @Param pageSize query int true "每页数量"
+// @Success 200 {object} utils.Response
+// @Failure 400 {object} utils.Response
+// @Router /tasks/get [get]
+// @Security BearerAuth
+// @Param role header string false "admin required"
 func GetAllTasks(c *gin.Context) {
-	role, _ := c.Get("role")
-	fmt.Println("role", role)
-	if role != "admin" {
-		utils.Error(c, 401, "permission denied")
-		// c.JSON(http.StatusForbidden, gin.H{
-		// 	"error": "permission denied",
-		// })
-		return
-	}
+
 	pageStr := c.Query("page")
 	page, _ := strconv.Atoi(pageStr)
 	if page <= 0 {
@@ -77,9 +83,9 @@ func GetAllTasks(c *gin.Context) {
 		pageSize = 10
 	}
 
-	tasks, err, total := repository.GetTasks(repository.DB, page, pageSize)
+	tasks, total, err := service.GetAllTasks(page, pageSize)
 	if err != nil {
-		utils.Error(c, 400, "出错了")
+		utils.Error(c, 400, err.Error())
 		// c.JSON(http.StatusBadRequest, gin.H{
 		// 	"error": "出错了",
 		// })
@@ -119,6 +125,17 @@ func GetTaskById(c *gin.Context) {
 
 }
 
+// @Summary 更新任务
+// @Description 更新当前用户的任务
+// @Tags tasks
+// @Accept json
+// @Produce json
+// @Param id path int true "任务ID"
+// @Param task body dto.UpdateTaskRequest true "任务信息"
+// @Success 200 {object} utils.Response
+// @Failure 401 {object} utils.Response
+// @Router /tasks/{id} [put]
+// @Security BearerAuth
 func UpdateTaskById(c *gin.Context) {
 	var req dto.UpdateTaskRequest
 	ids := c.Param("id")

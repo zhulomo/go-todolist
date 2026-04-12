@@ -80,3 +80,22 @@ func OperateMiddleware() gin.HandlerFunc {
 		c.Next()
 	}
 }
+
+func RequireRole(role string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		roleInterface, ok := c.Get("role")
+		if !ok {
+			utils.Error(c, 401, "no role")
+			c.Abort()
+			return
+		}
+		r, ok := roleInterface.(string)
+		if !ok || r != role {
+			utils.Error(c, 500, "permission denied")
+			c.Abort()
+			return
+		}
+		c.Next()
+
+	}
+}

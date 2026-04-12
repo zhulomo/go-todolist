@@ -10,7 +10,7 @@ type Response struct {
 
 func Success(c *gin.Context, data interface{}) {
 	c.JSON(200, Response{
-		Code:    0,
+		Code:    200,
 		Message: "success",
 		Data:    data,
 	})

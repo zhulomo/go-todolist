@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"go-gin-api/dto"
 	"go-gin-api/service"
 	"go-gin-api/utils"
 
@@ -24,10 +25,14 @@ func Login(c *gin.Context) {
 	var login LoginRequest
 
 	if err := c.ShouldBindJSON(&login); err != nil {
-		utils.Error(c, 400, "invalid request")
+		//utils.Error(c, 400, "invalid request")
 		// c.JSON(http.StatusBadRequest, gin.H{
 		// 	"error": "invalid request",
 		// })
+		c.Error(dto.AppError{
+			Code: 400,
+			Msg:  "invalid request",
+		})
 		return
 	}
 

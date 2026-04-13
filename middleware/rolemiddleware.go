@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"fmt"
 	"go-gin-api/repository"
 	"go-gin-api/response"
 	"strconv"
@@ -28,7 +27,7 @@ func RoleMiddleware(requireRole string) gin.HandlerFunc {
 			return
 		}
 		userID := userIDInterface.(uint)
-		fmt.Println("userID:", userID)
+		//fmt.Println("userID:", userID)
 		role, err := repository.GetRoleByUserID(repository.DB, userID)
 
 		if err != nil {
@@ -69,7 +68,7 @@ func OperateMiddleware() gin.HandlerFunc {
 			return
 		}
 		userID := userIInterface.(uint)
-		fmt.Println("userID:", userID)
+		//fmt.Println("userID:", userID)
 		taskID, err := strconv.Atoi(c.Param("id"))
 		if err != nil {
 			response.Error(c, 500, "服务器错误")

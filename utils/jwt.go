@@ -1,12 +1,24 @@
 package utils
 
 import (
+	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 )
 
-var jwtSecret = []byte("my_secret_key")
+var jwtSecret []byte
+
+func init() {
+	secret := os.Getenv("JWT_SECRET")
+	if secret == "" {
+		panic("JWT_SECRET environment variable is not set")
+
+	}
+	jwtSecret = []byte(secret)
+}
+
+//var jwtSecret = []byte("my_secret_key")
 
 type MyClaims struct {
 	UserID   uint   `json:"user_id"`

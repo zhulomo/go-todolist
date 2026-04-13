@@ -36,7 +36,7 @@ func Login(username, password string) (string, error) {
 		// c.JSON(http.StatusInternalServerError, gin.H{
 		// 	"error": "failed to generate token",
 		// })
-		return "", dto.AppError{Code: 400, Msg: "failed to generate token", Err: err}
+		return "", dto.AppError{Code: 500, Msg: "failed to generate token", Err: err}
 	}
 	return token, nil
 

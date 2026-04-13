@@ -12,7 +12,7 @@ import (
 func SetRouter() *gin.Engine {
 
 	r := gin.Default()
-
+	r.Use(middleware.ErrorMiddleware())
 	protected := r.Group("/")
 	//公共接口
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

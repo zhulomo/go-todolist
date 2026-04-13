@@ -2,8 +2,8 @@ package handler
 
 import (
 	"go-gin-api/dto"
+	"go-gin-api/response"
 	"go-gin-api/service"
-	"go-gin-api/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -33,16 +33,18 @@ func Login(c *gin.Context) {
 			Code: 400,
 			Msg:  "invalid request",
 		})
+		c.Abort()
 		return
 	}
 
 	token, error := service.Login(login.Username, login.Password)
 	if error != nil {
-		utils.Error(c, 400, error.Error())
+		c.Error(error)
+		c.Abort()
 		return
 	}
 
-	utils.Success(c, token)
+	response.Success(c, token)
 	// c.JSON(http.StatusOK, gin.H{
 	// 	"token": token,
 	// })

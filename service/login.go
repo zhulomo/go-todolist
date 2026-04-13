@@ -1,7 +1,7 @@
 package service
 
 import (
-	"errors"
+	"go-gin-api/dto"
 	"go-gin-api/repository"
 	"go-gin-api/utils"
 )
@@ -12,7 +12,7 @@ func Login(username, password string) (string, error) {
 		// c.JSON(http.StatusBadRequest, gin.H{
 		// 	"error": "username and password required",
 		//})
-		return "", errors.New("username and password required ")
+		return "", dto.AppError{Code: 400, Msg: "username and password required"}
 	}
 
 	user, err := repository.GetUserByUsername(repository.DB, username)
@@ -21,14 +21,14 @@ func Login(username, password string) (string, error) {
 		// c.JSON(http.StatusBadRequest, gin.H{
 		// 	"error": "username does not exist",
 		// })
-		return "", errors.New("user does not exist")
+		return "", dto.AppError{Code: 404, Msg: "user does not exist", Err: err}
 	}
 	if err := utils.CheckPassword(password, user.Password); err != nil {
 		//utils.Error(c, 400, "password does not correct")
 		// c.JSON(http.StatusBadRequest, gin.H{
 		// 	"error": "password does not correct",
 		// })
-		return "", errors.New("password does not correct")
+		return "", dto.AppError{Code: 401, Msg: "password incorrect", Err: err}
 	}
 	token, err := utils.GenerateToken(user.ID, user.Username, user.Role)
 	if err != nil {
@@ -36,7 +36,7 @@ func Login(username, password string) (string, error) {
 		// c.JSON(http.StatusInternalServerError, gin.H{
 		// 	"error": "failed to generate token",
 		// })
-		return "", errors.New("failed to generate token")
+		return "", dto.AppError{Code: 400, Msg: "failed to generate token", Err: err}
 	}
 	return token, nil
 

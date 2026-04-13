@@ -9,7 +9,7 @@ import (
 
 func AdminGetUsers(c *gin.Context) {
 
-	var users []repository.User
+	var users []repository.Users
 	repository.DB.Find(&users)
 	c.JSON(http.StatusOK, users)
 }

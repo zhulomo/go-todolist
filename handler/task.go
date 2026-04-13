@@ -3,8 +3,8 @@ package handler
 import (
 	"go-gin-api/dto"
 	"go-gin-api/repository"
+	"go-gin-api/response"
 	"go-gin-api/service"
-	"go-gin-api/utils"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -34,23 +34,31 @@ func CreateTasks(c *gin.Context) {
 	var req dto.CreateTaskRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		utils.Error(c, 400, "invalid request")
+		//utils.Error(c, 400, "invalid request")
 		// c.JSON(http.StatusBadRequest, gin.H{
 		// 	"error": "invalid  request",
 		// })
+		c.Error(dto.AppError{
+			Code: 400,
+			Msg:  "invalid request",
+			Err:  err,
+		})
+		c.Abort()
 		return
 	}
 	userIDInterface, _ := c.Get("userID")
 	userID := userIDInterface.(uint)
 
 	if err := service.CreateTask(userID, req); err != nil {
-		utils.Error(c, 400, err.Error())
+		//utils.Error(c, 400, err.Error())
 		// c.JSON(http.StatusBadRequest, gin.H{
 		// 	"error": "can't create task",
 		// })
+		c.Error(err)
+		c.Abort()
 		return
 	}
-	utils.Success(c, nil)
+	response.Success(c, nil)
 	// c.JSON(http.StatusOK, gin.H{
 	// 	"message": "task created!",
 	// })
@@ -85,25 +93,31 @@ func GetAllTasks(c *gin.Context) {
 
 	tasks, total, err := service.GetAllTasks(page, pageSize)
 	if err != nil {
-		utils.Error(c, 400, err.Error())
+		//utils.Error(c, 400, err.Error())
 		// c.JSON(http.StatusBadRequest, gin.H{
 		// 	"error": "出错了",
 		// })
+		c.Error(err)
+		c.Abort()
 		return
 	}
 
 	//c.JSON(http.StatusOK, tasks)
 	//优化返回结构
-	utils.Success(c, gin.H{
+	response.Success(c, gin.H{
 		//c.JSON(http.StatusOK, gin.H{
-		"code":    200,
-		"message": "success",
-		"data": gin.H{
-			"list":     tasks,
-			"total":    total,
-			"page":     page,
-			"pageSize": pageSize,
-		},
+		//"code":    200,
+		//"message": "success",
+		// "data": gin.H{
+		// 	"list":     tasks,
+		// 	"total":    total,
+		// 	"page":     page,
+		// 	"pageSize": pageSize,
+		// },
+		"list":     tasks,
+		"total":    total,
+		"page":     page,
+		"pageSize": pageSize,
 	})
 }
 
@@ -112,13 +126,19 @@ func GetTaskById(c *gin.Context) {
 	id, _ := strconv.Atoi(ids)
 	task, err := repository.GetTaskByID(repository.DB, uint(id))
 	if err != nil {
-		utils.Error(c, 400, "taskid doesn't exist")
+		//utils.Error(c, 400, "taskid doesn't exist")
 		// c.JSON(http.StatusBadRequest, gin.H{
 		// 	"error": "taskid doesn't exist",
 		// })
+		c.Error(dto.AppError{
+			Code: 404,
+			Msg:  "task does not exist",
+			Err:  err,
+		})
+		c.Abort()
 		return
 	}
-	utils.Success(c, gin.H{
+	response.Success(c, gin.H{
 		"task": task,
 	})
 	//c.JSON(http.StatusOK, task)
@@ -141,22 +161,30 @@ func UpdateTaskById(c *gin.Context) {
 	ids := c.Param("id")
 	id, _ := strconv.Atoi(ids)
 	if err := c.ShouldBindJSON(&req); err != nil {
-		utils.Error(c, 400, "invalid request")
+		//utils.Error(c, 400, "invalid request")
 		// c.JSON(http.StatusBadRequest, gin.H{
 		// 	"error": "invalid  request",
 		// })
+		c.Error(dto.AppError{
+			Code: 400,
+			Msg:  "invalid request",
+			Err:  err,
+		})
+		c.Abort()
 		return
 	}
 	err := service.UpdateTask(uint(id), req)
 	if err != nil {
-		utils.Error(c, 400, err.Error())
+		//utils.Error(c, 400, err.Error())
 		// c.JSON(400, gin.H{
 		// 	"error": err.Error(),
 		// })
+		c.Error(err)
+		c.Abort()
 		return
 	}
 
-	utils.Success(c, nil)
+	response.Success(c, nil)
 	// c.JSON(http.StatusOK, gin.H{
 	// 	"message": "update successed",
 	// })
@@ -168,21 +196,32 @@ func TaskDelete(c *gin.Context) {
 	id, _ := strconv.Atoi(ids)
 	tasks, err := repository.GetTaskByID(repository.DB, uint(id))
 	if err != nil {
-		utils.Error(c, 400, "task not found")
+		//utils.Error(c, 400, "task not found")
 		// c.JSON(http.StatusBadRequest, gin.H{
 		// 	"error": "task not found",
 		// })
+		c.Error(dto.AppError{
+			Code: 404,
+			Msg:  "task not found",
+			Err:  err,
+		})
+		c.Abort()
 		return
 	}
 	if err := repository.DeleteTask(repository.DB, tasks); err != nil {
-		utils.Error(c, 400, "can't delete")
+		//utils.Error(c, 400, "can't delete")
 		// c.JSON(http.StatusBadRequest, gin.H{
 		// 	"error": "Can't delete",
 		// })
+		c.Error(dto.AppError{
+			Code: 500,
+			Msg:  "delete falied",
+			Err:  err,
+		})
 		return
 	}
 
-	utils.Success(c, nil)
+	response.Success(c, nil)
 	// c.JSON(http.StatusOK, gin.H{
 	// 	"message": "delete  successed",
 	// })

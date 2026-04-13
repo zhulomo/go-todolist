@@ -1,8 +1,9 @@
 package handler
 
 import (
+	"go-gin-api/dto"
+	"go-gin-api/response"
 	"go-gin-api/service"
-	"go-gin-api/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -30,16 +31,23 @@ func Register(c *gin.Context) {
 
 	//绑定JSON
 	if err := c.ShouldBindJSON(&req); err != nil {
-		utils.Error(c, 400, "invalid request")
+		//utils.Error(c, 400, "invalid request")
 		// c.JSON(http.StatusBadRequest, gin.H{
 		// 	"error": "invalid request",
 		// })
+		c.Error(dto.AppError{
+			Code: 400,
+			Msg:  "invalid request",
+		})
+		c.Abort()
 		return
 	}
 
 	user, err := service.Register(req.Username, req.Password)
 	if err != nil {
-		utils.Error(c, 400, err.Error())
+		//utils.Error(c, 400, err.Error())
+		c.Error(err)
+		c.Abort()
 		return
 	}
 	resp := UserResponse{
@@ -48,7 +56,7 @@ func Register(c *gin.Context) {
 		Role:     user.Role,
 	}
 
-	utils.Success(c, gin.H{
+	response.Success(c, gin.H{
 		"user": resp,
 	})
 	// c.JSON(http.StatusOK, gin.H{

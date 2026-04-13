@@ -25,15 +25,15 @@ func CreateTask(db *gorm.DB, task *Task) error {
 	return nil
 }
 
-func GetTasksByUserID(db *gorm.DB, userID uint) (*Task, error) {
-	var task Task
+func GetTasksByUserID(db *gorm.DB, userID uint) ([]Task, error) {
+	var task []Task
 	err := db.Where("UserID = ?", userID).Find(&task).Error
 
 	if err != nil {
 		return nil, err
 	}
 
-	return &task, nil
+	return task, nil
 }
 
 func GetTaskByID(db *gorm.DB, id uint) (*Task, error) {

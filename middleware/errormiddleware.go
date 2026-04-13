@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"go-gin-api/dto"
-	"go-gin-api/utils"
+	"go-gin-api/response"
 
 	"github.com/gin-gonic/gin"
 )
@@ -12,7 +12,7 @@ func ErrorMiddleware() gin.HandlerFunc {
 		defer func() {
 			if err := recover(); err != nil {
 				// 捕获panic
-				utils.Error(c, 500, "服务器内部错误")
+				response.Error(c, 500, "服务器内部错误")
 
 			}
 		}()
@@ -24,12 +24,12 @@ func ErrorMiddleware() gin.HandlerFunc {
 			err := c.Errors.Last().Err
 
 			if appErr, ok := err.(dto.AppError); ok {
-				utils.Error(c, appErr.Code, appErr.Msg)
+				response.Error(c, appErr.Code, appErr.Msg)
 				return
 			}
 
 			// 默认错误
-			utils.Error(c, 500, err.Error())
+			response.Error(c, 500, err.Error())
 		}
 	}
 }

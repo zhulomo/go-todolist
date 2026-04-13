@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"fmt"
+	"go-gin-api/response"
 	"go-gin-api/utils"
 	"strings"
 
@@ -13,11 +13,15 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		authHeader := c.GetHeader("Authorization")
 
-		fmt.Println("Authorization Header:", authHeader)
+		//fmt.Println("Authorization Header:", authHeader)
 		if authHeader == "" {
-			utils.Error(c, 401, "authorization header required")
+			response.Error(c, 401, "authorization header required")
 			// c.JSON(http.StatusUnauthorized, gin.H{
 			// 	"error": "authorization header required",
+			// })
+			// c.Error(dto.AppError{
+			// 	Code: 401,
+			// 	Msg:  "authorization header required",
 			// })
 			c.Abort()
 			return
@@ -25,9 +29,13 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		parts := strings.Split(authHeader, " ")
 		if len(parts) != 2 || parts[0] != "Bearer" {
-			utils.Error(c, 401, "invalid authorization format")
+			response.Error(c, 401, "invalid authorization format")
 			// c.JSON(http.StatusUnauthorized, gin.H{
 			// 	"error": "invaild authorization format",
+			// })
+			// c.Error(dto.AppError{
+			// 	Code: 401,
+			// 	Msg:  "invalid authorization format",
 			// })
 			c.Abort()
 			return
@@ -37,9 +45,14 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		claims, err := utils.ParseToken(tokenString)
 		if err != nil {
-			utils.Error(c, 401, "invalid expired token")
+			response.Error(c, 401, "invalid expired token")
 			// c.JSON(http.StatusUnauthorized, gin.H{
 			// 	"error": "invalid expired token",
+			// })
+			// c.Error(dto.AppError{
+			// 	Code: 401,
+			// 	Msg:  "invalid expired token",
+			// 	Err:  err,
 			// })
 			c.Abort()
 			return

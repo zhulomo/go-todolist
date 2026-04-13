@@ -10,6 +10,11 @@ type User struct {
 	Password string
 	Role     string `gorm:"default:user"`
 }
+type Users struct {
+	ID       uint   `gorm:"primaryKey"`
+	Username string `gorm:"unique"`
+	Role     string `gorm:"default:user"`
+}
 
 func GetUserByUsername(db *gorm.DB, username string) (*User, error) {
 	var user User
